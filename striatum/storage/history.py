@@ -18,7 +18,11 @@ class History(object):
     rewarded_at : {datetime, None}
     """
 
-    def __init__(self, history_id, context, recommendations, created_at,
+    def __init__(self,
+                 history_id,
+                 context,
+                 recommendations,
+                 created_at,
                  rewarded_at=None):
         self.history_id = history_id
         self.context = context
@@ -35,7 +39,7 @@ class History(object):
         rewarded_at : {datetime, None}
         """
         if not hasattr(self.recommendations, '__iter__'):
-            recommendations = (self.recommendations,)
+            recommendations = (self.recommendations, )
         else:
             recommendations = self.recommendations
 
@@ -49,7 +53,7 @@ class History(object):
     @property
     def rewards(self):
         if not hasattr(self.recommendations, '__iter__'):
-            recommendations = (self.recommendations,)
+            recommendations = (self.recommendations, )
         else:
             recommendations = self.recommendations
         rewards = {}
@@ -63,6 +67,7 @@ class History(object):
 class HistoryStorage(object):
     """The object to store the history of context, recommendations and rewards.
     """
+
     @abstractmethod
     def get_history(self, history_id):
         """Get the previous context, recommendations and rewards with

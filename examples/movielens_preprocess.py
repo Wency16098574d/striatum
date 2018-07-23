@@ -17,7 +17,11 @@ import itertools
 def movie_preprocessing(movie):
     movie_col = list(movie.columns)
     movie_tag = [doc.split('|') for doc in movie['tag']]
-    tag_table = {token: idx for idx, token in enumerate(set(itertools.chain.from_iterable(movie_tag)))}
+    tag_table = {
+        token: idx
+        for idx, token in enumerate(
+            set(itertools.chain.from_iterable(movie_tag)))
+    }
     movie_tag = pd.DataFrame(movie_tag)
     tag_table = pd.DataFrame(tag_table.items())
     tag_table.columns = ['Tag', 'Index']
@@ -51,7 +55,8 @@ def feature_extraction(data):
 
     # streaming_batch: the result for testing bandit algrorithms
     top50_data = data[data['movie_id'].isin(actions)]
-    top50_data = top50_data.sort('timestamp', ascending=1)
+    # top50_data = top50_data.sort('timestamp', ascending=1)
+    top50_data = top50_data.sort_values(by=['timestamp'])
     streaming_batch = top50_data['user_id']
 
     # reward_list: if rating >=3, the user will watch the movie
@@ -63,23 +68,37 @@ def feature_extraction(data):
 
 def main():
     # read and preprocess the movie data
-    movie = pd.read_table('movies.dat', sep='::', names=['movie_id', 'movie_name', 'tag'], engine='python')
+    movie = pd.read_table(
+        'movies.dat',
+        sep='::',
+        names=['movie_id', 'movie_name', 'tag'],
+        engine='python')
     movie = movie_preprocessing(movie)
 
     # read the ratings data and merge it with movie data
-    rating = pd.read_table("ratings.dat", sep="::",
-                           names=["user_id", "movie_id", "rating", "timestamp"], engine='python')
+    rating = pd.read_table(
+        "ratings.dat",
+        sep="::",
+        names=["user_id", "movie_id", "rating", "timestamp"],
+        engine='python')
     data = pd.merge(rating, movie, on="movie_id")
 
     # extract feature from our data set
-    streaming_batch, user_feature, actions, reward_list = feature_extraction(data)
+    streaming_batch, user_feature, actions, reward_list = feature_extraction(
+        data)
     streaming_batch.to_csv("streaming_batch.csv", sep='\t', index=False)
+    print("Done saving streaming batch")
     user_feature.to_csv("user_feature.csv", sep='\t')
-    pd.DataFrame(actions, columns=['movie_id']).to_csv("actions.csv", sep='\t', index=False)
+    print("Done saving user feature")
+    pd.DataFrame(
+        actions, columns=['movie_id']).to_csv(
+            "actions.csv", sep='\t', index=False)
     reward_list.to_csv("reward_list.csv", sep='\t', index=False)
-
+    print("Done saving reward list")
     action_context = movie[movie['movie_id'].isin(actions)]
-    action_context.to_csv("action_context.csv", sep='\t', index = False)
+    action_context.to_csv("action_context.csv", sep='\t', index=False)
+    print("Done saving action context")
+
 
 if __name__ == '__main__':
     main()

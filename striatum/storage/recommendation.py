@@ -9,7 +9,11 @@ class Recommendation(object):
     score: float
     """
 
-    def __init__(self, action, estimated_reward, uncertainty, score,
+    def __init__(self,
+                 action,
+                 estimated_reward,
+                 uncertainty,
+                 score,
                  reward=None):
         self.action = action
         self.estimated_reward = estimated_reward

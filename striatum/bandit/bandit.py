@@ -31,7 +31,10 @@ class BaseBandit(object):
         The HistoryStorage object to store history context, actions and rewards.
     """
 
-    def __init__(self, history_storage, model_storage, action_storage,
+    def __init__(self,
+                 history_storage,
+                 model_storage,
+                 action_storage,
                  recommendation_cls=None):
         self._history_storage = history_storage
         self._model_storage = model_storage

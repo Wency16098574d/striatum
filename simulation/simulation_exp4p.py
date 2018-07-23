@@ -53,15 +53,15 @@ def main():  # pylint: disable=too-many-locals
     for delta_i, delta in enumerate(tuning_region):
         historystorage = MemoryHistoryStorage()
         modelstorage = MemoryModelStorage()
-        policy = Exp4P(actions, historystorage, modelstorage,
-                       delta=delta, p_min=None)
+        policy = Exp4P(
+            actions, historystorage, modelstorage, delta=delta, p_min=None)
         cum_regret = simulation.evaluate_policy(policy, advice1,
                                                 desired_actions1)
         ctr_tuning[delta_i] = n_rounds - cum_regret[-1]
     ctr_tuning /= n_rounds
     delta_opt = tuning_region[np.argmax(ctr_tuning)]
-    simulation.plot_tuning_curve(tuning_region, ctr_tuning,
-                                 label="delta changes")
+    simulation.plot_tuning_curve(
+        tuning_region, ctr_tuning, label="delta changes")
 
     # Regret Analysis
     n_rounds = 10000
@@ -70,8 +70,8 @@ def main():  # pylint: disable=too-many-locals
     advice2 = get_advice(context2, action_ids, experts)
     historystorage = MemoryHistoryStorage()
     modelstorage = MemoryModelStorage()
-    policy = Exp4P(actions, historystorage, modelstorage,
-                   delta=delta_opt, p_min=None)
+    policy = Exp4P(
+        actions, historystorage, modelstorage, delta=delta_opt, p_min=None)
 
     for t in range(n_rounds):
         history_id, action = policy.get_action(advice2[t], 1)

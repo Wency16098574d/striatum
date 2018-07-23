@@ -11,7 +11,6 @@ import numpy as np
 
 from striatum.bandit.bandit import BaseBandit
 
-
 LOGGER = logging.getLogger(__name__)
 
 
@@ -46,8 +45,13 @@ class LinUCB(BaseBandit):
             International Conference on World Wide Web (WWW), 2010.
     """
 
-    def __init__(self, history_storage, model_storage, action_storage,
-                 recommendation_cls=None, context_dimension=128, alpha=0.5):
+    def __init__(self,
+                 history_storage,
+                 model_storage,
+                 action_storage,
+                 recommendation_cls=None,
+                 context_dimension=128,
+                 alpha=0.5):
         super(LinUCB, self).__init__(history_storage, model_storage,
                                      action_storage, recommendation_cls)
         self.alpha = alpha
@@ -94,12 +98,10 @@ class LinUCB(BaseBandit):
             action_context = np.reshape(context[action_id], (-1, 1))
             estimated_reward[action_id] = float(
                 theta[action_id].T.dot(action_context))
-            uncertainty[action_id] = float(
-                self.alpha * np.sqrt(action_context.T
-                                     .dot(A_inv[action_id])
-                                     .dot(action_context)))
-            score[action_id] = (estimated_reward[action_id]
-                                + uncertainty[action_id])
+            uncertainty[action_id] = float(self.alpha * np.sqrt(
+                action_context.T.dot(A_inv[action_id]).dot(action_context)))
+            score[action_id] = (
+                estimated_reward[action_id] + uncertainty[action_id])
         return estimated_reward, uncertainty, score
 
     def get_action(self, context, n_actions=None):
@@ -124,8 +126,8 @@ class LinUCB(BaseBandit):
             {Action object, estimated_reward, uncertainty}.
         """
         if self._action_storage.count() == 0:
-            return self._get_action_with_empty_action_storage(context,
-                                                              n_actions)
+            return self._get_action_with_empty_action_storage(
+                context, n_actions)
 
         if not isinstance(context, dict):
             raise ValueError("LinUCB requires context dict for all actions!")
@@ -143,18 +145,20 @@ class LinUCB(BaseBandit):
                 score=score[recommendation_id],
             )
         else:
-            recommendation_ids = sorted(score, key=score.get,
-                                        reverse=True)[:n_actions]
+            recommendation_ids = sorted(
+                score, key=score.get, reverse=True)[:n_actions]
             recommendations = []  # pylint: disable=redefined-variable-type
             for action_id in recommendation_ids:
-                recommendations.append(self._recommendation_cls(
-                    action=self._action_storage.get(action_id),
-                    estimated_reward=estimated_reward[action_id],
-                    uncertainty=uncertainty[action_id],
-                    score=score[action_id],
-                ))
+                recommendations.append(
+                    self._recommendation_cls(
+                        action=self._action_storage.get(action_id),
+                        estimated_reward=estimated_reward[action_id],
+                        uncertainty=uncertainty[action_id],
+                        score=score[action_id],
+                    ))
 
-        history_id = self._history_storage.add_history(context, recommendations)
+        history_id = self._history_storage.add_history(context,
+                                                       recommendations)
         return history_id, recommendations
 
     def reward(self, history_id, rewards):
@@ -168,8 +172,7 @@ class LinUCB(BaseBandit):
         rewards : dictionary
             The dictionary {action_id, reward}, where reward is a float.
         """
-        context = (self._history_storage
-                   .get_unrewarded_history(history_id)
+        context = (self._history_storage.get_unrewarded_history(history_id)
                    .context)
 
         # Update the model

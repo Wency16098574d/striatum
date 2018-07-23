@@ -45,8 +45,13 @@ class Exp3(BaseBandit):
             multi-armed bandit problem ." SIAM Journal of Computing. 2002.
     """
 
-    def __init__(self, history_storage, model_storage, action_storage,
-                 recommendation_cls=None, gamma=0.3, random_state=None):
+    def __init__(self,
+                 history_storage,
+                 model_storage,
+                 action_storage,
+                 recommendation_cls=None,
+                 gamma=0.3,
+                 random_state=None):
         super(Exp3, self).__init__(history_storage, model_storage,
                                    action_storage, recommendation_cls)
         self.random_state = get_random_state(random_state)
@@ -74,9 +79,8 @@ class Exp3(BaseBandit):
         probs = {}
         n_actions = self._action_storage.count()
         for action_id in self._action_storage.iterids():
-            probs[action_id] = ((1 - self.gamma) * w[action_id]
-                                / w_sum
-                                + self.gamma / n_actions)
+            probs[action_id] = ((1 - self.gamma) * w[action_id] / w_sum +
+                                self.gamma / n_actions)
 
         return probs
 
@@ -102,16 +106,15 @@ class Exp3(BaseBandit):
             {Action object, estimated_reward, uncertainty}.
         """
         if self._action_storage.count() == 0:
-            return self._get_action_with_empty_action_storage(context,
-                                                              n_actions)
+            return self._get_action_with_empty_action_storage(
+                context, n_actions)
 
         probs = self._exp3_probs()
         if n_actions == -1:
             n_actions = self._action_storage.count()
 
         action_ids = list(six.viewkeys(probs))
-        prob_array = np.asarray([probs[action_id]
-                                 for action_id in action_ids])
+        prob_array = np.asarray([probs[action_id] for action_id in action_ids])
         recommendation_ids = self.random_state.choice(
             action_ids, size=n_actions, p=prob_array, replace=False)
 
@@ -125,14 +128,16 @@ class Exp3(BaseBandit):
         else:
             recommendations = []  # pylint: disable=redefined-variable-type
             for action_id in recommendation_ids:
-                recommendations.append(self._recommendation_cls(
-                    action=self._action_storage.get(action_id),
-                    estimated_reward=probs[action_id],
-                    uncertainty=probs[action_id],
-                    score=probs[action_id],
-                ))
+                recommendations.append(
+                    self._recommendation_cls(
+                        action=self._action_storage.get(action_id),
+                        estimated_reward=probs[action_id],
+                        uncertainty=probs[action_id],
+                        score=probs[action_id],
+                    ))
 
-        history_id = self._history_storage.add_history(context, recommendations)
+        history_id = self._history_storage.add_history(context,
+                                                       recommendations)
         return history_id, recommendations
 
     def reward(self, history_id, rewards):
@@ -153,9 +158,10 @@ class Exp3(BaseBandit):
             recommendations = history.recommendations
         else:
             recommendations = [history.recommendations]
-        probs = {rec.action.id: rec.estimated_reward
-                 for rec in recommendations
-                 if rec.action.id in rewards}
+        probs = {
+            rec.action.id: rec.estimated_reward
+            for rec in recommendations if rec.action.id in rewards
+        }
 
         # Update the model
         for action_id, reward in rewards.items():

@@ -5,7 +5,10 @@ import matplotlib.pyplot as plt
 from .utils import get_random_state
 
 
-def simulate_data(n_rounds, context_dimension, action_storage, algorithm=None,
+def simulate_data(n_rounds,
+                  context_dimension,
+                  action_storage,
+                  algorithm=None,
                   random_state=None):
     """Simulate dataset for the contextual bandit problem.
 
@@ -47,21 +50,19 @@ def simulate_data(n_rounds, context_dimension, action_storage, algorithm=None,
             context[t] = random_state.uniform(0, 1, context_dimension)
             context_sum = context[t].sum()
             for action_i, action_id in enumerate(action_ids):
-                if (action_i * context_dimension / action_storage.count()
-                        < context_sum
-                        <= ((action_i + 1) * context_dimension
-                            / action_storage.count())):
+                if (action_i * context_dimension / action_storage.count() <
+                        context_sum <= ((action_i + 1) * context_dimension /
+                                        action_storage.count())):
                     desired_actions[t] = action_id
 
     else:
         for t in range(n_rounds):
             context[t] = {}
             for action_id in action_ids:
-                context[t][action_id] = random_state.uniform(0, 1,
-                                                             context_dimension)
+                context[t][action_id] = random_state.uniform(
+                    0, 1, context_dimension)
             desired_actions[t] = max(
-                context[t],
-                key=lambda action_id: context[t][action_id].sum())
+                context[t], key=lambda action_id: context[t][action_id].sum())
     return context, desired_actions
 
 

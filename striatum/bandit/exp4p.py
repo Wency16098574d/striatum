@@ -42,8 +42,13 @@ class Exp4P(BaseBandit):
             Artificial Intelligence and Statistics (AISTATS). 2011u.
     """
 
-    def __init__(self, actions, historystorage, modelstorage, delta=0.1,
-                 p_min=None, max_rounds=10000):
+    def __init__(self,
+                 actions,
+                 historystorage,
+                 modelstorage,
+                 delta=0.1,
+                 p_min=None,
+                 max_rounds=10000):
         super(Exp4P, self).__init__(historystorage, modelstorage, actions)
         self.n_total = 0
         # number of actions (i.e. K in the paper)
@@ -91,12 +96,13 @@ class Exp4P(BaseBandit):
 
         action_probs_list = []
         for action_id in self.action_ids:
-            weighted_exp = [w[advisor_id] * context[advisor_id][action_id]
-                            for advisor_id in advisor_ids]
+            weighted_exp = [
+                w[advisor_id] * context[advisor_id][action_id]
+                for advisor_id in advisor_ids
+            ]
             prob_vector = np.sum(weighted_exp) / w_sum
-            action_probs_list.append((1 - self.n_actions * self.p_min)
-                                     * prob_vector
-                                     + self.p_min)
+            action_probs_list.append(
+                (1 - self.n_actions * self.p_min) * prob_vector + self.p_min)
         action_probs_list = np.asarray(action_probs_list)
         action_probs_list /= action_probs_list.sum()
 
@@ -107,8 +113,10 @@ class Exp4P(BaseBandit):
             estimated_reward[action_id] = action_prob
             uncertainty[action_id] = 0
             score[action_id] = action_prob
-        self._modelstorage.save_model(
-            {'action_probs': estimated_reward, 'w': w})
+        self._modelstorage.save_model({
+            'action_probs': estimated_reward,
+            'w': w
+        })
 
         return estimated_reward, uncertainty, score
 
@@ -136,16 +144,20 @@ class Exp4P(BaseBandit):
         estimated_reward, uncertainty, score = self._exp4p_score(context)
 
         action_recommendation = []
-        action_recommendation_ids = sorted(score, key=score.get,
-                                           reverse=True)[:n_actions]
+        action_recommendation_ids = sorted(
+            score, key=score.get, reverse=True)[:n_actions]
 
         for action_id in action_recommendation_ids:
             action = self.get_action_with_id(action_id)
             action_recommendation.append({
-                'action': action,
-                'estimated_reward': estimated_reward[action_id],
-                'uncertainty': uncertainty[action_id],
-                'score': score[action_id],
+                'action':
+                action,
+                'estimated_reward':
+                estimated_reward[action_id],
+                'uncertainty':
+                uncertainty[action_id],
+                'score':
+                score[action_id],
             })
 
         self.n_total += 1
@@ -164,8 +176,7 @@ class Exp4P(BaseBandit):
         rewards : dictionary
             The dictionary {action_id, reward}, where reward is a float.
         """
-        context = (self._historystorage
-                   .get_unrewarded_history(history_id)
+        context = (self._historystorage.get_unrewarded_history(history_id)
                    .context)
 
         model = self._modelstorage.get_model()
@@ -178,18 +189,16 @@ class Exp4P(BaseBandit):
             y_hat = {}
             v_hat = {}
             for i in six.viewkeys(context):
-                y_hat[i] = (context[i][action_id] * reward
-                            / action_probs[action_id])
+                y_hat[i] = (
+                    context[i][action_id] * reward / action_probs[action_id])
                 v_hat[i] = sum(
                     [context[i][k] / action_probs[k] for k in action_ids])
-                w[i] = w[i] * np.exp(
-                    self.p_min / 2
-                    * (y_hat[i] + v_hat[i]
-                       * np.sqrt(np.log(len(context) / self.delta)
-                                 / (len(action_ids) * self.max_rounds))))
+                w[i] = w[i] * np.exp(self.p_min / 2 *
+                                     (y_hat[i] + v_hat[i] * np.sqrt(
+                                         np.log(len(context) / self.delta) /
+                                         (len(action_ids) * self.max_rounds))))
 
-        self._modelstorage.save_model({
-            'action_probs': action_probs, 'w': w})
+        self._modelstorage.save_model({'action_probs': action_probs, 'w': w})
 
         # Update the history
         self._historystorage.add_reward(history_id, rewards)

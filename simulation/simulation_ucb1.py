@@ -20,8 +20,7 @@ def main():
     n_rounds = 10000
     context, desired_actions = simulation.simulate_data(
         n_rounds, context_dimension, action_storage, random_state=1)
-    policy = UCB1(MemoryHistoryStorage(), MemoryModelStorage(),
-                  action_storage)
+    policy = UCB1(MemoryHistoryStorage(), MemoryModelStorage(), action_storage)
 
     for t in range(n_rounds):
         history_id, recommendation = policy.get_action(context[t])

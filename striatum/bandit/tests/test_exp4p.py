@@ -10,7 +10,6 @@
 # from striatum.bandit import exp4p
 # from striatum.bandit.bandit import Action
 
-
 # class Exp4P(unittest.TestCase):
 #     def setUp(self):
 #         self.modelstorage = model.MemoryModelStorage()

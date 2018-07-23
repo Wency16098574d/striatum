@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 
 
 def calculate_cum_reward(policy):
-
     """Calculate cumulative reward with respect to time.
 
         Parameters
@@ -31,7 +30,6 @@ def calculate_cum_reward(policy):
 
 
 def calculate_avg_reward(policy):
-
     """Calculate average reward with respect to time.
 
         Parameters
@@ -52,7 +50,6 @@ def calculate_avg_reward(policy):
 
 
 def plot_avg_reward(policy):
-
     """Plot average reward with respect to time.
 
         Parameters
@@ -62,8 +59,8 @@ def plot_avg_reward(policy):
     """
 
     avg_reward = calculate_avg_reward(policy)
-    plt.plot(avg_reward.keys(), avg_reward.values(), 'r-',
-             label="average reward")
+    plt.plot(
+        avg_reward.keys(), avg_reward.values(), 'r-', label="average reward")
     plt.xlabel('time')
     plt.ylabel('avg reward')
     plt.legend()
@@ -71,7 +68,6 @@ def plot_avg_reward(policy):
 
 
 def plot_avg_regret(policy):
-
     """Plot average regret with respect to time.
 
         Parameters

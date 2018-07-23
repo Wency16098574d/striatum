@@ -133,8 +133,7 @@ def policy_evaluation(policy,
                                        streaming_batch.iloc[t, 0]]
 
             #if action[0]['action'].action_id not in list(
-            if action.action.id not in list(
-                    watched_list['movie_id']):
+            if action.action.id not in list(watched_list['movie_id']):
                 #policy.reward(history_id, {action[0]['action'].action_id: 0.0})
                 policy.reward(history_id, {action.action.id: 0.0})
                 if t == 0:
@@ -163,8 +162,7 @@ def policy_evaluation(policy,
                                        streaming_batch.iloc[t, 0]]
 
             #if action[0]['action'].id not in list(
-            if action.action.id not in list(
-                    watched_list['movie_id']):
+            if action.action.id not in list(watched_list['movie_id']):
                 #policy.reward(history_id, {action[0]['action'].action_id: 0.0})
                 policy.reward(history_id, {action.action.id: 0.0})
                 if t == 0:

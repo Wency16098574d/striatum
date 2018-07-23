@@ -1,3 +1,2 @@
 from .misc import (
-    get_random_state,
-)
+    get_random_state, )

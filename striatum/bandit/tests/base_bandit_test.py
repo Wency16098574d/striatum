@@ -54,8 +54,7 @@ class BaseBanditTest(object):
         history_id, recommendations = policy.get_action(context, None)
         self.assertEqual(history_id, 0)
         self.assertIsInstance(recommendations, Recommendation)
-        self.assertIn(recommendations.action.id,
-                      self.action_storage.iterids())
+        self.assertIn(recommendations.action.id, self.action_storage.iterids())
         self.assertEqual(
             policy._history_storage.get_unrewarded_history(history_id).context,
             context)
@@ -111,13 +110,13 @@ class BaseBanditTest(object):
         self.assertDictEqual(
             policy._history_storage.get_history(history_id1).context, context1)
         self.assertDictEqual(
-            policy._history_storage.get_unrewarded_history(history_id2).context,
-            context2)
+            policy._history_storage.get_unrewarded_history(history_id2)
+            .context, context2)
         self.assertDictEqual(
             policy._history_storage.get_history(history_id1).rewards, rewards)
         self.assertDictEqual(
-            policy._history_storage.get_unrewarded_history(history_id2).rewards,
-            {})
+            policy._history_storage.get_unrewarded_history(history_id2)
+            .rewards, {})
 
     def test_reward_order_descending(self):
         policy = self.policy
@@ -128,13 +127,13 @@ class BaseBanditTest(object):
         rewards = {recommendations2.action.id: 1.}
         policy.reward(history_id2, rewards)
         self.assertDictEqual(
-            policy._history_storage.get_unrewarded_history(history_id1).context,
-            context1)
+            policy._history_storage.get_unrewarded_history(history_id1)
+            .context, context1)
         self.assertDictEqual(
             policy._history_storage.get_history(history_id2).context, context2)
         self.assertDictEqual(
-            policy._history_storage.get_unrewarded_history(history_id1).rewards,
-            {})
+            policy._history_storage.get_unrewarded_history(history_id1)
+            .rewards, {})
         self.assertDictEqual(
             policy._history_storage.get_history(history_id2).rewards, rewards)
 
@@ -155,24 +154,25 @@ class ChangeableActionSetBanditTest(object):
         policy = self.policy
         new_actions = [Action() for i in range(2)]
         policy.add_action(new_actions)
-        self.assertEqual(set(a.id for a in self.actions + new_actions),
-                         set(self.action_storage.iterids()))
+        self.assertEqual(
+            set(a.id for a in self.actions + new_actions),
+            set(self.action_storage.iterids()))
 
     def test_add_action_from_empty_change_storage(self):
         policy = self.policy_with_empty_action_storage
         new_actions = [Action() for i in range(2)]
         policy.add_action(new_actions)
-        self.assertEqual(set(a.id for a in new_actions),
-                         set(policy._action_storage.iterids()))
+        self.assertEqual(
+            set(a.id for a in new_actions),
+            set(policy._action_storage.iterids()))
 
     def test_remove_action_change_storage(self):
         policy = self.policy
         removed_action = self.actions[1]
         policy.remove_action(removed_action.id)
-        new_action_ids = set(a.id for a in self.actions
-                             if a.id != removed_action.id)
-        self.assertEqual(new_action_ids,
-                         set(self.action_storage.iterids()))
+        new_action_ids = set(
+            a.id for a in self.actions if a.id != removed_action.id)
+        self.assertEqual(new_action_ids, set(self.action_storage.iterids()))
 
     def test_remove_and_get_action_and_reward(self):
         policy = self.policy

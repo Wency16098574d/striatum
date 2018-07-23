@@ -6,6 +6,7 @@ from abc import abstractmethod
 
 class ModelStorage(object):
     """The object to store the model."""
+
     @abstractmethod
     def get_model(self):
         """Get model"""
@@ -19,6 +20,7 @@ class ModelStorage(object):
 
 class MemoryModelStorage(ModelStorage):
     """Store the model in memory."""
+
     def __init__(self):
         self._model = None
 

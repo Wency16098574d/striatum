@@ -59,9 +59,16 @@ class LinThompSamp(BaseBandit):
             Processing Systems 24. 2011.
     """
 
-    def __init__(self, history_storage, model_storage, action_storage,
-                 recommendation_cls=None, context_dimension=128, delta=0.5,
-                 R=0.01, epsilon=0.5, random_state=None):
+    def __init__(self,
+                 history_storage,
+                 model_storage,
+                 action_storage,
+                 recommendation_cls=None,
+                 context_dimension=128,
+                 delta=0.5,
+                 R=0.01,
+                 epsilon=0.5,
+                 random_state=None):
         super(LinThompSamp, self).__init__(history_storage, model_storage,
                                            action_storage, recommendation_cls)
         self.random_state = get_random_state(random_state)
@@ -100,14 +107,13 @@ class LinThompSamp(BaseBandit):
     def _linthompsamp_score(self, context):
         """Thompson Sampling"""
         action_ids = list(six.viewkeys(context))
-        context_array = np.asarray([context[action_id]
-                                    for action_id in action_ids])
+        context_array = np.asarray(
+            [context[action_id] for action_id in action_ids])
         model = self._model_storage.get_model()
         B = model['B']  # pylint: disable=invalid-name
         mu_hat = model['mu_hat']
-        v = self.R * np.sqrt(24 / self.epsilon
-                             * self.context_dimension
-                             * np.log(1 / self.delta))
+        v = self.R * np.sqrt(24 / self.epsilon * self.context_dimension *
+                             np.log(1 / self.delta))
         mu_tilde = self.random_state.multivariate_normal(
             mu_hat.flat, v**2 * np.linalg.inv(B))[..., np.newaxis]
         estimated_reward_array = context_array.dot(mu_hat)
@@ -145,8 +151,8 @@ class LinThompSamp(BaseBandit):
             {Action object, estimated_reward, uncertainty}.
         """
         if self._action_storage.count() == 0:
-            return self._get_action_with_empty_action_storage(context,
-                                                              n_actions)
+            return self._get_action_with_empty_action_storage(
+                context, n_actions)
 
         if not isinstance(context, dict):
             raise ValueError(
@@ -154,7 +160,8 @@ class LinThompSamp(BaseBandit):
         if n_actions == -1:
             n_actions = self._action_storage.count()
 
-        estimated_reward, uncertainty, score = self._linthompsamp_score(context)
+        estimated_reward, uncertainty, score = self._linthompsamp_score(
+            context)
 
         if n_actions is None:
             recommendation_id = max(score, key=score.get)
@@ -165,18 +172,20 @@ class LinThompSamp(BaseBandit):
                 score=score[recommendation_id],
             )
         else:
-            recommendation_ids = sorted(score, key=score.get,
-                                        reverse=True)[:n_actions]
+            recommendation_ids = sorted(
+                score, key=score.get, reverse=True)[:n_actions]
             recommendations = []  # pylint: disable=redefined-variable-type
             for action_id in recommendation_ids:
-                recommendations.append(self._recommendation_cls(
-                    action=self._action_storage.get(action_id),
-                    estimated_reward=estimated_reward[action_id],
-                    uncertainty=uncertainty[action_id],
-                    score=score[action_id],
-                ))
+                recommendations.append(
+                    self._recommendation_cls(
+                        action=self._action_storage.get(action_id),
+                        estimated_reward=estimated_reward[action_id],
+                        uncertainty=uncertainty[action_id],
+                        score=score[action_id],
+                    ))
 
-        history_id = self._history_storage.add_history(context, recommendations)
+        history_id = self._history_storage.add_history(context,
+                                                       recommendations)
         return history_id, recommendations
 
     def reward(self, history_id, rewards):
@@ -190,8 +199,7 @@ class LinThompSamp(BaseBandit):
         rewards : dictionary
             The dictionary {action_id, reward}, where reward is a float.
         """
-        context = (self._history_storage
-                   .get_unrewarded_history(history_id)
+        context = (self._history_storage.get_unrewarded_history(history_id)
                    .context)
 
         # Update the model

@@ -12,6 +12,5 @@ storage
 """
 import pkg_resources
 
-
 __all__ = ['bandit', 'storage']
 __version__ = pkg_resources.get_distribution('striatum').version

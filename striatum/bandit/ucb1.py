@@ -33,7 +33,10 @@ class UCB1(BaseBandit):
             Problem." Machine Learning, 47. 2002.
     """
 
-    def __init__(self, history_storage, model_storage, action_storage,
+    def __init__(self,
+                 history_storage,
+                 model_storage,
+                 action_storage,
                  recommendation_cls=None):
         super(UCB1, self).__init__(history_storage, model_storage,
                                    action_storage, recommendation_cls)
@@ -44,9 +47,12 @@ class UCB1(BaseBandit):
             action_times[action_id] = 1
         n_rounds = self._action_storage.count()
         self._model_storage.save_model({
-            'total_action_reward': total_action_reward,
-            'action_times': action_times,
-            'n_rounds': n_rounds,
+            'total_action_reward':
+            total_action_reward,
+            'action_times':
+            action_times,
+            'n_rounds':
+            n_rounds,
         })
 
     def _ucb1_score(self):
@@ -59,10 +65,10 @@ class UCB1(BaseBandit):
         uncertainty_dict = {}
         score_dict = {}
         for action_id in self._action_storage.iterids():
-            estimated_reward = (total_action_reward[action_id]
-                                / action_times[action_id])
-            uncertainty = np.sqrt(2 * np.log(n_rounds)
-                                  / action_times[action_id])
+            estimated_reward = (
+                total_action_reward[action_id] / action_times[action_id])
+            uncertainty = np.sqrt(
+                2 * np.log(n_rounds) / action_times[action_id])
             estimated_reward_dict[action_id] = estimated_reward
             uncertainty_dict[action_id] = uncertainty
             score_dict[action_id] = estimated_reward + uncertainty
@@ -90,8 +96,8 @@ class UCB1(BaseBandit):
             {Action object, estimated_reward, uncertainty}.
         """
         if self._action_storage.count() == 0:
-            return self._get_action_with_empty_action_storage(context,
-                                                              n_actions)
+            return self._get_action_with_empty_action_storage(
+                context, n_actions)
 
         estimated_reward, uncertainty, score = self._ucb1_score()
         if n_actions == -1:
@@ -106,18 +112,20 @@ class UCB1(BaseBandit):
                 score=score[recommendation_id],
             )
         else:
-            recommendation_ids = sorted(score, key=score.get,
-                                        reverse=True)[:n_actions]
+            recommendation_ids = sorted(
+                score, key=score.get, reverse=True)[:n_actions]
             recommendations = []  # pylint: disable=redefined-variable-type
             for action_id in recommendation_ids:
-                recommendations.append(self._recommendation_cls(
-                    action=self._action_storage.get(action_id),
-                    estimated_reward=estimated_reward[action_id],
-                    uncertainty=uncertainty[action_id],
-                    score=score[action_id],
-                ))
+                recommendations.append(
+                    self._recommendation_cls(
+                        action=self._action_storage.get(action_id),
+                        estimated_reward=estimated_reward[action_id],
+                        uncertainty=uncertainty[action_id],
+                        score=score[action_id],
+                    ))
 
-        history_id = self._history_storage.add_history(context, recommendations)
+        history_id = self._history_storage.add_history(context,
+                                                       recommendations)
         return history_id, recommendations
 
     def reward(self, history_id, rewards):
