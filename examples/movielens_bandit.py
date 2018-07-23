@@ -179,7 +179,7 @@ def policy_evaluation(policy,
 
     elif bandit == 'random':
         for t in range(times):
-            action = actions_id[np.random.randint(0, len(actions) - 1)]
+            action = actions_id[np.random.randint(0, len(actions_id) - 1)]
             watched_list = reward_list[reward_list['user_id'] ==
                                        streaming_batch.iloc[t, 0]]
 
@@ -212,12 +212,12 @@ def main():
     #    'LinUCB', 'LinThompSamp', 'Exp4P', 'UCB1', 'Exp3', 'random'
     #]
     experiment_bandit = [
-        'LinUCB',
-        'LinThompSamp', 
-        #'Exp4P',  # FIXME: Still buggy
-        'UCB1', 
-        'Exp3', 
-        #'random' # FIXME: Still buggy
+        #'LinUCB',
+        #'LinThompSamp', 
+        'Exp4P',  # FIXME: Still buggy
+        #'UCB1', 
+        #'Exp3', 
+        #'random' 
     ]
     regret = {}
     col = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
