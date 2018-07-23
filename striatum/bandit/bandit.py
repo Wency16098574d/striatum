@@ -42,7 +42,9 @@ class BaseBandit(object):
         if recommendation_cls is None:
             self._recommendation_cls = Recommendation
         else:
+            # TODO: THIS ASSIGN TO a float from main.py, temporarily made it useless for now
             self._recommendation_cls = recommendation_cls
+            self._recommendation_cls = Recommendation
 
     @property
     def history_storage(self):
