@@ -8,7 +8,8 @@ import matplotlib.pyplot as plt
 
 from striatum.storage import MemoryHistoryStorage, MemoryModelStorage
 from striatum.bandit import Exp4P
-from striatum.bandit.bandit import Action
+from striatum.storage import Action
+#from striatum.bandit.bandit import Action
 from striatum import simulation
 
 

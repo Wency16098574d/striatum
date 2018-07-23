@@ -97,7 +97,6 @@ def policy_generation(bandit, actions):
             epsilon=0.71)
 
     elif bandit == 'UCB1':
-        print("GETTING UCB TO RUN FROM POLICY GENERATION")
         policy = ucb1.UCB1(historystorage, modelstorage, actions)
 
     elif bandit == 'Exp3':
@@ -151,6 +150,7 @@ def policy_evaluation(policy,
         for t in range(times):
             feature = user_feature[user_feature.index == streaming_batch.iloc[
                 t, 0]]
+            # LOO, very slow!
             experts = train_expert(action_context)
             advice = {}
             for i in range(len(experts)):
@@ -214,7 +214,7 @@ def main():
     experiment_bandit = [
         'LinUCB',
         'LinThompSamp', 
-        'Exp4P',
+        # 'Exp4P', # Takes very long as train expert is LOO Cross Validation
         'UCB1', 
         'Exp3', 
         'random' 
