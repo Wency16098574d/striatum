@@ -43,9 +43,9 @@ class Exp4P(BaseBandit):
     """
 
     def __init__(self,
-                 actions,
                  historystorage,
                  modelstorage,
+                 actions,
                  delta=0.1,
                  p_min=None,
                  max_rounds=10000):
@@ -82,21 +82,22 @@ class Exp4P(BaseBandit):
             # weight vector for each expert
             'w': {},
         }
-        self._modelstorage.save_model(model)
+        self._model_storage.save_model(model)
 
     def _exp4p_score(self, context):
         """The main part of Exp4.P.
         """
         advisor_ids = list(six.viewkeys(context))
 
-        w = self._modelstorage.get_model()['w']
+        w = self._model_storage.get_model()['w']
         if len(w) == 0:
             for i in advisor_ids:
                 w[i] = 1
         w_sum = sum(six.viewvalues(w))
 
         action_probs_list = []
-        for action_id in self.action_ids:
+        #for action_id in self.action_ids:
+        for action_id in self._action_storage.iterids():
             weighted_exp = [
                 w[advisor_id] * context[advisor_id][action_id]
                 for advisor_id in advisor_ids
@@ -110,11 +111,12 @@ class Exp4P(BaseBandit):
         estimated_reward = {}
         uncertainty = {}
         score = {}
-        for action_id, action_prob in zip(self.action_ids, action_probs_list):
+        #for action_id, action_prob in zip(self.action_ids, action_probs_list):
+        for action_id, action_prob in zip(self._action_storage.iterids(), action_probs_list):
             estimated_reward[action_id] = action_prob
             uncertainty[action_id] = 0
             score[action_id] = action_prob
-        self._modelstorage.save_model({
+        self._model_storage.save_model({
             'action_probs': estimated_reward,
             'w': w
         })
@@ -142,6 +144,7 @@ class Exp4P(BaseBandit):
             In each dictionary, it will contains {Action object,
             estimated_reward, uncertainty}.
         """
+        # TODO: FIXME: Figure out if this is a bug as independent on number of action_id in for loop below
         estimated_reward, uncertainty, score = self._exp4p_score(context)
 
         action_recommendation = []
@@ -149,7 +152,9 @@ class Exp4P(BaseBandit):
             score, key=score.get, reverse=True)[:n_actions]
 
         for action_id in action_recommendation_ids:
-            action = self.get_action_with_id(action_id)
+            #action = self.get_action_with_id(action_id)
+            action=self._action_storage.get(action_id)
+            '''
             action_recommendation.append({
                 'action':
                 action,
@@ -160,10 +165,16 @@ class Exp4P(BaseBandit):
                 'score':
                 score[action_id],
             })
-
+            '''
+            action_recommendation.append(
+            self._recommendation_cls(
+                    action,
+                    estimated_reward[action_id],
+                    uncertainty[action_id],
+                    score[action_id],))
         self.n_total += 1
-        history_id = self._historystorage.add_history(
-            context, action_recommendation, reward=None)
+        history_id = self._history_storage.add_history(
+            context, action_recommendation, rewards=None)
         return history_id, action_recommendation
 
     def reward(self, history_id, rewards):
@@ -177,10 +188,10 @@ class Exp4P(BaseBandit):
         rewards : dictionary
             The dictionary {action_id, reward}, where reward is a float.
         """
-        context = (self._historystorage.get_unrewarded_history(history_id)
+        context = (self._history_storage.get_unrewarded_history(history_id)
                    .context)
 
-        model = self._modelstorage.get_model()
+        model = self._model_storage.get_model()
         w = model['w']
         action_probs = model['action_probs']
         action_ids = list(six.viewkeys(six.next(six.itervalues(context))))
@@ -199,7 +210,7 @@ class Exp4P(BaseBandit):
                                          np.log(len(context) / self.delta) /
                                          (len(action_ids) * self.max_rounds))))
 
-        self._modelstorage.save_model({'action_probs': action_probs, 'w': w})
+        self._model_storage.save_model({'action_probs': action_probs, 'w': w})
 
         # Update the history
-        self._historystorage.add_reward(history_id, rewards)
+        self._history_storage.add_reward(history_id, rewards)

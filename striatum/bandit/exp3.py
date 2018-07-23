@@ -171,6 +171,8 @@ class Exp3(BaseBandit):
         self._model_storage.save_model({'w': w})
 
         # Update the history
+        #print("exp3 HistoryID", history_id)
+        #print("exp3 rewards", rewards)
         self._history_storage.add_reward(history_id, rewards)
 
     def add_action(self, actions):

@@ -162,10 +162,10 @@ def policy_evaluation(policy,
             watched_list = reward_list[reward_list['user_id'] ==
                                        streaming_batch.iloc[t, 0]]
 
-            #if action[0]['action'].id not in list(
-            if action.action.id not in list(watched_list['movie_id']):
-                #policy.reward(history_id, {action[0]['action'].action_id: 0.0})
-                policy.reward(history_id, {action.action.id: 0.0})
+            #if action[0]['action'].id not in list(watched_list['movie_id']):
+            if action[0].action.id not in list(watched_list['movie_id']):
+                policy.reward(history_id, {action[0].action.id: 0.0})
+                #policy.reward(history_id, {action[0]['action'].id: 0.0})
                 if t == 0:
                     seq_error[t] = 1.0
                 else:
@@ -173,7 +173,7 @@ def policy_evaluation(policy,
 
             else:
                 #policy.reward(history_id, {action[0]['action'].action_id: 1.0})
-                policy.reward(history_id, {action.action.id: 1.0})
+                policy.reward(history_id, {action[0].action.id: 1.0})
                 if t > 0:
                     seq_error[t] = seq_error[t - 1]
 
@@ -212,12 +212,12 @@ def main():
     #    'LinUCB', 'LinThompSamp', 'Exp4P', 'UCB1', 'Exp3', 'random'
     #]
     experiment_bandit = [
-        #'LinUCB',
-        #'LinThompSamp', 
-        'Exp4P',  # FIXME: Still buggy
-        #'UCB1', 
-        #'Exp3', 
-        #'random' 
+        'LinUCB',
+        'LinThompSamp', 
+        'Exp4P',
+        'UCB1', 
+        'Exp3', 
+        'random' 
     ]
     regret = {}
     col = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
