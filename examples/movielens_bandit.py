@@ -79,7 +79,7 @@ def policy_generation(bandit, actions):
 
     if bandit == 'Exp4P':
         policy = exp4p.Exp4P(
-            historystorage, modelstorage, actions, delta=0.5, pmin=None)
+            historystorage, modelstorage, actions, delta=0.5, p_min=None)
 
     elif bandit == 'LinUCB':
         #policy = linucb.LinUCB(historystorage, modelstorage, actions, 0.3, 20)
@@ -90,9 +90,10 @@ def policy_generation(bandit, actions):
             historystorage,
             modelstorage,
             actions,
-            d=20,
+            #d=20, Supposed to be context dimension
+            context_dimension=18,
             delta=0.61,
-            r=0.01,
+            R=0.01,
             epsilon=0.71)
 
     elif bandit == 'UCB1':
@@ -207,8 +208,16 @@ def main():
     streaming_batch_small = streaming_batch.iloc[0:10000]
 
     # conduct regret analyses
+    #experiment_bandit = [
+    #    'LinUCB', 'LinThompSamp', 'Exp4P', 'UCB1', 'Exp3', 'random'
+    #]
     experiment_bandit = [
-        'LinUCB', 'LinThompSamp', 'Exp4P', 'UCB1', 'Exp3', 'random'
+        'LinUCB',
+        'LinThompSamp', 
+        #'Exp4P',  # FIXME: Still buggy
+        'UCB1', 
+        'Exp3', 
+        #'random' # FIXME: Still buggy
     ]
     regret = {}
     col = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
