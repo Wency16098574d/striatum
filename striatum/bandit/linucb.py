@@ -46,9 +46,9 @@ class LinUCB(BaseBandit):
     """
 
     def __init__(self,
-                 history_storage,
-                 model_storage,
-                 action_storage,
+                 history_storage, # Stores history for reward calculation
+                 model_storage, # stores model parameters
+                 action_storage, # stores list of possible actions
                  recommendation_cls=None,
                  context_dimension=128,
                  alpha=0.5):
@@ -73,20 +73,30 @@ class LinUCB(BaseBandit):
             'theta': {},
         }
         for action_id in self._action_storage.iterids():
+            # Initialize a model for each action
             self._init_action_model(model, action_id)
 
         self._model_storage.save_model(model)
 
     def _init_action_model(self, model, action_id):
+        '''
+        Initialize model parameters for each action
+        '''
+        # A represents the parameters for this context
         model['A'][action_id] = np.identity(self.context_dimension)
+        # A_inverse to prevent inverse calculations too often, so just store both?
         model['A_inv'][action_id] = np.identity(self.context_dimension)
+        # Bias
         model['b'][action_id] = np.zeros((self.context_dimension, 1))
+        # Parameter for the action
         model['theta'][action_id] = np.zeros((self.context_dimension, 1))
 
     def _linucb_score(self, context):
-        """disjoint LINUCB algorithm.
+        """
+        Disjoint LINUCB algorithm.
         """
         model = self._model_storage.get_model()
+        # Model stores parameters theta and  
         A_inv = model['A_inv']  # pylint: disable=invalid-name
         theta = model['theta']
 
@@ -94,19 +104,22 @@ class LinUCB(BaseBandit):
         estimated_reward = {}
         uncertainty = {}
         score = {}
+        # For the current action, calculate the estimate reward for that action
+        # Calculate the uncertainty based on the 
         for action_id in self._action_storage.iterids():
             action_context = np.reshape(context[action_id], (-1, 1))
             estimated_reward[action_id] = float(
                 theta[action_id].T.dot(action_context))
             uncertainty[action_id] = float(self.alpha * np.sqrt(
                 action_context.T.dot(A_inv[action_id]).dot(action_context)))
+            # UCB = Mean + Uncertainty
             score[action_id] = (
                 estimated_reward[action_id] + uncertainty[action_id])
         return estimated_reward, uncertainty, score
 
     def get_action(self, context, n_actions=None):
-        """Return the action to perform
-
+        """
+        Return the action to perform
         Parameters
         ----------
         context : dict
@@ -134,10 +147,15 @@ class LinUCB(BaseBandit):
         if n_actions == -1:
             n_actions = self._action_storage.count()
 
+        # Get reward, uncertainty and score of current context for all actions
         estimated_reward, uncertainty, score = self._linucb_score(context)
 
+        # If only need 1 action
         if n_actions is None:
+            # Recommend the highest score and the arm_index of the highest score called key
             recommendation_id = max(score, key=score.get)
+            # Recommend the action corresponding to the highets score
+            # Set the recommendation
             recommendations = self._recommendation_cls(
                 action=self._action_storage.get(recommendation_id),
                 estimated_reward=estimated_reward[recommendation_id],
@@ -145,9 +163,11 @@ class LinUCB(BaseBandit):
                 score=score[recommendation_id],
             )
         else:
+            # Sort the highest K actions
             recommendation_ids = sorted(
                 score, key=score.get, reverse=True)[:n_actions]
             recommendations = []  # pylint: disable=redefined-variable-type
+            # Recommend all k actions
             for action_id in recommendation_ids:
                 recommendations.append(
                     self._recommendation_cls(
@@ -157,12 +177,15 @@ class LinUCB(BaseBandit):
                         score=score[action_id],
                     ))
 
+        # Add the list of recommendations into the history
         history_id = self._history_storage.add_history(context,
                                                        recommendations)
         return history_id, recommendations
 
     def reward(self, history_id, rewards):
-        """Reward the previous action with reward.
+        """
+        Updates the model with the previous action, reward pairs
+        Reward the previous action with reward.
 
         Parameters
         ----------
@@ -172,22 +195,26 @@ class LinUCB(BaseBandit):
         rewards : dictionary
             The dictionary {action_id, reward}, where reward is a float.
         """
-        context = (self._history_storage.get_unrewarded_history(history_id)
-                   .context)
+        context = (self._history_storage.get_unrewarded_history(history_id).context)
 
-        # Update the model
+        # Get the model and its parameters
         model = self._model_storage.get_model()
         A = model['A']  # pylint: disable=invalid-name
         A_inv = model['A_inv']  # pylint: disable=invalid-name
         b = model['b']
         theta = model['theta']
 
+        # Update the model based on all the rewards (action, reward) pairs
         for action_id, reward in six.viewitems(rewards):
             action_context = np.reshape(context[action_id], (-1, 1))
             A[action_id] += action_context.dot(action_context.T)
             A_inv[action_id] = np.linalg.inv(A[action_id])
+            # update bias
             b[action_id] += reward * action_context
+            # Update parameters
             theta[action_id] = A_inv[action_id].dot(b[action_id])
+
+        # Save the updated model
         self._model_storage.save_model({
             'A': A,
             'A_inv': A_inv,
@@ -222,10 +249,14 @@ class LinUCB(BaseBandit):
         action_id : int
             The id of the action to remove.
         """
+        # Get a copy of the model
         model = self._model_storage.get_model()
+        # Modify the model
         del model['A'][action_id]
         del model['A_inv'][action_id]
         del model['b'][action_id]
         del model['theta'][action_id]
+        # Save the current model 
         self._model_storage.save_model(model)
+        # Remove this action from action storage
         self._action_storage.remove(action_id)
