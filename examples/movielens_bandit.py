@@ -83,7 +83,7 @@ def policy_generation(bandit, actions):
 
     elif bandit == 'LinUCB':
         #policy = linucb.LinUCB(historystorage, modelstorage, actions, 0.3, 20)
-        policy = linucb.LinUCB(historystorage, modelstorage, actions, 0.3, 18)
+        policy = linucb.LinUCB(history_storage = historystorage, model_storage = modelstorage,action_storage = actions, alpha = 0.3, context_dimension = 18)
 
     elif bandit == 'LinThompSamp':
         policy = linthompsamp.LinThompSamp(
